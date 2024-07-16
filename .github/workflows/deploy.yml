@@ -29,6 +29,8 @@ jobs:
         export SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
         export GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
         export DEFAULT_AWS_REGION=${{ secrets.DEFAULT_AWS_REGION }}
+        export ADMINUSERNAME=${{ secrets.ADMINUSERNAME }}
+        export ADMINUSERPASSWORD=${{ secrets.ADMINUSERPASSWORD }}
 
     - name: Deploy SAM Application
       run: |
