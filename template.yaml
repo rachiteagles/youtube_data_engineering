@@ -42,9 +42,9 @@ Resources:
           AMI_ID: ami-04b70fa74e45c3917 # Update with a valid AMI ID for your region
           IAM_INSTANCE_PROFILE_NAME: !Ref EC2InstanceProfile
           KEY_NAME: youtube
-          ACCESS_KEY_ID: {ACCESS_KEY_ID}
-          SECRET_ACCESS_KEY: {SECRET_ACCESS_KEY}
-          GOOGLE_API_KEY: {GOOGLE_API_KEY}
+          ACCESS_KEY_ID: !Sub ${env.ACCESS_KEY_ID}
+          SECRET_ACCESS_KEY: !Sub ${env.SECRET_ACCESS_KEY}
+          GOOGLE_API_KEY: !Sub ${env.GOOGLE_API_KEY}
           DEFAULT_REGION: us-east-1
 
       Events:
@@ -93,8 +93,8 @@ Resources:
     Type: 'AWS::RedshiftServerless::Namespace'
     Properties: 
       NamespaceName: youtube-ns
-      AdminUsername: {AdminUsername}
-      AdminUserPassword: {AdminUserPassword}
+      AdminUsername: !Sub ${env.AdminUsername}
+      AdminUserPassword: !Sub ${env.AdminUserPassword}
       DbName: youtube
 
   MyRedshiftServerlessWorkgroup:
