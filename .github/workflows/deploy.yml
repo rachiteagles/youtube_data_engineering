@@ -31,9 +31,6 @@ jobs:
         export DEFAULT_AWS_REGION=${{ secrets.DEFAULT_AWS_REGION }}
 
     - name: Deploy SAM Application
-      env:
-        MY_API_KEY: ${{ secrets.MY_API_KEY }}
       run: |
         sam build
-        sam deploy --no-confirm-changeset --stack-name my-sam-app --capabilities CAPABILITY_IAM \
-          --parameter-overrides MyApiKey=$MY_API_KEY
+        sam deploy --no-confirm-changeset --stack-name my-sam-app --capabilities CAPABILITY_IAM
