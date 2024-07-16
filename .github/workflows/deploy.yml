@@ -1,0 +1,39 @@
+name: Deploy SAM Application
+
+on:
+  push:
+    branches:
+      - main  # Change this to your deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'  # Change to your preferred Python version
+
+    - name: Install AWS CLI and SAM CLI
+      run: |
+        pip install awscli
+        pip install aws-sam-cli
+
+    - name: Configure AWS and google credentials
+      run: |
+        export ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+        export SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        export GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+        export DEFAULT_AWS_REGION=${{ secrets.DEFAULT_AWS_REGION }}
+
+    - name: Deploy SAM Application
+      env:
+        MY_API_KEY: ${{ secrets.MY_API_KEY }}
+      run: |
+        sam build
+        sam deploy --no-confirm-changeset --stack-name my-sam-app --capabilities CAPABILITY_IAM \
+          --parameter-overrides MyApiKey=$MY_API_KEY

@@ -45,7 +45,7 @@ Resources:
           ACCESS_KEY_ID: !Sub ${env.ACCESS_KEY_ID}
           SECRET_ACCESS_KEY: !Sub ${env.SECRET_ACCESS_KEY}
           GOOGLE_API_KEY: !Sub ${env.GOOGLE_API_KEY}
-          DEFAULT_REGION: us-east-1
+          DEFAULT_REGION: !Sub ${env.DEFAULT_AWS_REGION}
 
       Events:
         EC2InstanceTrigger:

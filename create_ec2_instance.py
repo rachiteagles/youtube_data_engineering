@@ -42,7 +42,6 @@ def lambda_handler(event, context):
     sudo aws configure set aws_access_key_id {ACCESS_KEY_ID} >> "$LOG_FILE" 2>&1
     sudo aws configure set aws_secret_access_key {SECRET_ACCESS_KEY} >> "$LOG_FILE" 2>&1
     sudo aws configure set region {DEFAULT_REGION} >> "$LOG_FILE" 2>&1
-    sudo aws configure set GOOGLE_API_KEY {GOOGLE_API_KEY} >> "$LOG_FILE" 2>&1
     sudo aws configure set output json  # Optional: Set output format to JSON >> "$LOG_FILE" 2>&1
 
     echo "copying from s3 to local" >> $LOG_FILE
