@@ -1,0 +1,452 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:
+
+  # S3 Bucket for incoming JSON files
+  IncomingJsonBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'youtube-json'
+  
+  # S3 Bucket for Successful JSON files
+  SuccessfulJsonBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'successful-json'
+
+  # S3 Bucket for Failed JSON files
+  FailureJsonBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'failed-json'
+
+  # scraping
+  CreateEC2InstanceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: create_ec2_instance.lambda_handler
+      Runtime: python3.9
+      CodeUri: .
+      Timeout: 90
+      Role: !GetAtt EC2Role.Arn
+      Policies:
+        - AmazonEC2FullAccess
+        - AmazonS3ReadOnlyAccess
+      Environment:
+        Variables:
+          S3_BUCKET: script-youtube
+          S3_KEY: scraper.zip
+          REGION: us-east-1
+          INSTANCE_TYPE: t2.micro
+          AMI_ID: ami-04b70fa74e45c3917 # Update with a valid AMI ID for your region
+          IAM_INSTANCE_PROFILE_NAME: !Ref EC2InstanceProfile
+          KEY_NAME: youtube
+          ACCESS_KEY_ID: {ACCESS_KEY_ID}
+          SECRET_ACCESS_KEY: {SECRET_ACCESS_KEY}
+          GOOGLE_API_KEY: {GOOGLE_API_KEY}
+          DEFAULT_REGION: us-east-1
+
+      Events:
+        EC2InstanceTrigger:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 8 * * ? *) # Change to your preferred schedule
+
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: EC2InstanceExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:*
+                  - iam:PassRole
+                  - s3:*
+                Resource: '*' # Update with specific ARNs if you want to limit resources
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+  
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - Ref: EC2Role
+
+  # moving data from json to bucket
+
+  MyRedshiftServerlessNamespace:
+    Type: 'AWS::RedshiftServerless::Namespace'
+    Properties: 
+      NamespaceName: youtube-ns
+      AdminUsername: {AdminUsername}
+      AdminUserPassword: {AdminUserPassword}
+      DbName: youtube
+
+  MyRedshiftServerlessWorkgroup:
+    Type: 'AWS::RedshiftServerless::Workgroup'
+    Properties: 
+      WorkgroupName: youtube-wg
+      BaseCapacity: 8
+      EnhancedVpcRouting: true
+      NamespaceName: !Ref MyRedshiftServerlessNamespace
+      SubnetIds:
+        - !Ref MySubnet1
+        - !Ref MySubnet2
+        - !Ref MySubnet3
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+
+  MyVpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: '10.0.0.0/16'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MyRedshiftServerlessVPC
+
+  MySubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref MyVpc
+      CidrBlock: '10.0.1.0/24'
+      AvailabilityZone: 'us-east-1e'
+      Tags:
+        - Key: Name
+          Value: MyRedshiftSubnet1
+
+  MySubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref MyVpc
+      CidrBlock: '10.0.2.0/24'
+      AvailabilityZone: 'us-east-1b'
+      Tags:
+        - Key: Name
+          Value: MyRedshiftSubnet2
+
+  MySubnet3:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref MyVpc
+      CidrBlock: '10.0.3.0/24'
+      AvailabilityZone: 'us-east-1c'
+      Tags:
+        - Key: Name
+          Value: MyRedshiftSubnet3
+
+  MySecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref MyVpc
+      GroupDescription: Allow access to Redshift
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+
+  MyRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref MyVpc
+      Tags:
+        - Key: Name
+          Value: MyRouteTable
+
+  MySubnetRouteTableAssociation1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref MySubnet1
+      RouteTableId: !Ref MyRouteTable
+
+  MySubnetRouteTableAssociation2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref MySubnet2
+      RouteTableId: !Ref MyRouteTable
+
+  MySubnetRouteTableAssociation3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref MySubnet3
+      RouteTableId: !Ref MyRouteTable
+
+  MyS3VpcEndpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      ServiceName: 'com.amazonaws.us-east-1.s3'
+      VpcId: !Ref MyVpc
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref MyRouteTable
+
+  GlueRedshiftConnection:
+    Type: AWS::Glue::Connection
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      ConnectionInput:
+        Name: RedshiftConnection
+        ConnectionType: JDBC
+        ConnectionProperties:
+          JDBC_CONNECTION_URL: !Sub jdbc:redshift://youtube-wg.${AWS::AccountId}.us-east-1.redshift-serverless.amazonaws.com:5439/youtube
+          USERNAME: admin
+          PASSWORD: Admin1405
+        PhysicalConnectionRequirements:
+          AvailabilityZone: us-east-1e
+          SubnetId: !Ref MySubnet1
+          SecurityGroupIdList:
+            - !Ref MySecurityGroup
+
+
+  # IAM Role for Glue Job
+  GlueJobRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 
+                - 'glue.amazonaws.com'
+                - 'redshift.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'GlueJobPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 's3:ListBucket'
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource:
+                  - 'arn:aws:s3:::*'
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: Allow
+                Action:
+                  - glue:GetConnection
+                  - glue:GetTable
+                  - glue:GetDatabase
+                Resource: arn:aws:glue:*
+              - Effect: Allow
+                Action:
+                  - redshift-serverless:*
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeVpcEndpoints
+                  - ec2:DescribeRouteTables
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:CreateTags
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - redshift:GetClusterCredentials
+                  - redshift:DescribeClusters
+                Resource: '*'
+
+  GlueJob:
+    Type: 'AWS::Glue::Job'
+    Properties:
+      Command:
+        Name: 'glueetl'
+        ScriptLocation: 'json2tab.py'
+        PythonVersion: '3'
+      Role: !GetAtt GlueJobRole.Arn
+      DefaultArguments:
+        '--job-language': 'python'
+      GlueVersion: '4.0'
+      MaxCapacity: 2
+      Connections:
+        Connections:
+          - !Ref GlueRedshiftConnection
+
+
+  # IAM Role for Lambda Function
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'LambdaGlueExecutionPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'glue:StartJobRun'
+                  - 'glue:GetJobRun'
+                Resource: !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:job/${GlueJob}'
+              - Effect: 'Allow'
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                Resource: 
+                  - 'arn:aws:s3:::script-youtube/*'
+                  - 'arn:aws:s3:::youtube-json/*'
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+
+  # Lambda Function to trigger Glue Job
+  GlueJobTriggerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: glue.handler
+      Runtime: python3.9
+      Timeout: 10
+      CodeUri: .
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          GLUE_JOB_NAME: !Ref GlueJob
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref IncomingJsonBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: '.json'
+
+  CopyExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                  - "s3:DeleteObject"
+                  - "s3:ListBucket"
+                Resource: 
+                  - 'arn:aws:s3:::script-youtube/*'
+                  - 'arn:aws:s3:::youtube-json/*'
+                  - 'arn:aws:s3:::successful-json/*'
+                  - 'arn:aws:s3:::failed-json/*'
+                  - 'arn:aws:s3:::youtube-json'
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+              - Effect: 'Allow'
+                Action:
+                  - 'glue:GetJobRun'
+                Resource: !Sub 'arn:${AWS::Partition}:glue:${AWS::Region}:${AWS::AccountId}:job/${GlueJob}'
+
+  CopyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: copyProcessedFiles.handler
+      Runtime: python3.9
+      Role: !GetAtt CopyExecutionRole.Arn
+      CodeUri: .
+      Environment:
+        Variables:
+          source_bucket: !Ref IncomingJsonBucket
+          success_bucket: !Ref SuccessfulJsonBucket
+          failure_bucket: !Ref FailureJsonBucket
+      Events:
+        GlueJobCompletion:
+          Type: CloudWatchEvent
+          Region: !GetAtt ${AWS::AccountId}
+          Properties:
+            Pattern:
+              source:
+                - "aws.glue"
+              detail-type:
+                - "Glue Job State Change"
+              detail: 
+                state: 
+                  - "SUCCEEDED"
+                  - "FAILED"
+  
+                
+
+Outputs:
+  GlueJobTriggerFunctionArn:
+    Description: 'ARN of the Lambda function'
+    Value: !GetAtt GlueJobTriggerFunction.Arn
+
+  GlueJobName:
+    Description: 'Name of the Glue job'
+    Value: !Ref GlueJob
+
+  RedshiftServerlessNamespace:
+    Description: 'Redshift Serverless Namespace'
+    Value: !Ref MyRedshiftServerlessNamespace
+
+  RedshiftServerlessWorkgroup:
+    Description: 'Redshift Serverless Workgroup'
+    Value: !Ref MyRedshiftServerlessWorkgroup
+
+  VPCId:
+    Description: 'VPC Id'
+    Value: !Ref MyVpc
+
+  Subnet1Id:
+    Description: 'Subnet 1 Id'
+    Value: !Ref MySubnet1
+
+  Subnet2Id:
+    Description: 'Subnet 2 Id'
+    Value: !Ref MySubnet2
+
+  Subnet3Id:
+    Description: 'Subnet 3 Id'
+    Value: !Ref MySubnet3
+
+  SecurityGroupId:
+    Description: 'Security Group Id'
+    Value: !Ref MySecurityGroup
