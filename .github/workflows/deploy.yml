@@ -23,7 +23,18 @@ jobs:
         pip install awscli
         pip install aws-sam-cli
 
+    - name: Setting AWS credentials
+      run: |
+        # Set AWS CLI configuration
+        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+        # Optionally set default region and output format
+        aws configure set region ${{ secrets.DEFAULT_AWS_REGION }}
+        aws configure set output json
+
+
     - name: Deploy SAM Application
       run: |
         sam build
-        sam deploy --resolve-s3 --region ${{ secrets.DEFAULT_AWS_REGION }} --stack-name my-sam-app --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
+        sam deploy --resolve-s3 --stack-name my-sam-app --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
