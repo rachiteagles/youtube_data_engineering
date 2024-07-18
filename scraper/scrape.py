@@ -51,7 +51,6 @@ def scrape_data(youtube, query):
 
     monetized_channels = []
     channels = search_channels(youtube, query)
-    print(query)
     for channel in channels:
         channel_id = channel['id']['channelId']
         channel_data = get_channel_details(youtube,channel_id)
@@ -59,6 +58,6 @@ def scrape_data(youtube, query):
         if is_monetized(channel_data):
             monetized_channels.append(channel_data)
         time.sleep(1)  # Respect API rate limits
-    print(channels)
+
     return monetized_channels
         

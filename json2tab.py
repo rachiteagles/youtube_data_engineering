@@ -119,7 +119,7 @@ AmazonRedshift_node1720146258039 = glueContext.write_dynamic_frame.from_options(
             DROP TABLE public.youtube_temp_vl1j0e;
             END;
         """,
-        "redshiftTmpDir": "s3://aws-glue-assets-590183870342-us-east-1/temporary/",
+        "redshiftTmpDir": "s3://redshift-youtube-tmp/",
         "useConnectionProperties": "true",
         "dbtable": "public.youtube_temp_vl1j0e",
         "connectionName": "RedshiftConnection",
@@ -161,7 +161,7 @@ AmazonRedshift_node1720146258039 = glueContext.write_dynamic_frame.from_options(
             );
         """
     },
-    transformation_ctx="AmazonRedshift_node1720146258039"
+    transformation_ctx="AmazonRedshift_node1720146258039",
 )
 
 job.commit()

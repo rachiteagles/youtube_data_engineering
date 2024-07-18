@@ -1,9 +1,9 @@
-import boto3
-import os
+import boto3, os, zipfile
+from botocore.exceptions import ClientError
 
 def lambda_handler(event, context):
     ec2 = boto3.resource('ec2', region_name=os.environ['REGION'])
-    s3_bucket = os.environ['S3_BUCKET']
+    s3_script_bucket = os.environ['S3_SCRIPT_BUCKET']
     s3_key = os.environ['S3_KEY']
     instance_type = os.environ['INSTANCE_TYPE']
     ami_id = os.environ['AMI_ID']
@@ -14,6 +14,30 @@ def lambda_handler(event, context):
     DEFAULT_REGION = os.environ['DEFAULT_REGION']
     GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
 
+    # Folder to zip and the destination bucket
+    folder_to_zip = 'scraper'  # Change to your folder path
+    zip_file = '/tmp/scraper.zip'
+
+    s3_client = boto3.client('s3')
+    
+    # Zipping the folder
+    with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(folder_to_zip):
+            for file in files:
+                zipf.write(os.path.join(root, file),
+                           os.path.relpath(os.path.join(root, file),
+                           os.path.join(folder_to_zip, '..')))
+
+    # Uploading to S3
+    try:
+        s3_client.upload_file(zip_file, s3_script_bucket, 'scraper.zip')
+        print(f'Successfully uploaded {zip_file} to {s3_script_bucket}/scraper.zip')
+    except ClientError as e:
+        print(f'Error uploading file: {e}')
+        return {
+            'statusCode': 500,
+            'body': 'Error uploading file'
+        }
 
     # UserData script to download, unzip, and run the Python script
     user_data = f"""#!/bin/bash
@@ -45,7 +69,7 @@ def lambda_handler(event, context):
     sudo aws configure set output json  # Optional: Set output format to JSON >> "$LOG_FILE" 2>&1
 
     echo "copying from s3 to local" >> $LOG_FILE
-    sudo aws s3 cp s3://{s3_bucket}/{s3_key} /home/ec2-user/{s3_key} >> "$LOG_FILE" 2>&1
+    sudo aws s3 cp s3://{s3_script_bucket}/{s3_key} /home/ec2-user/{s3_key} >> "$LOG_FILE" 2>&1
 
     echo "navigating to directory" >> $LOG_FILE
     cd /home/ec2-user >> "$LOG_FILE" 2>&1
