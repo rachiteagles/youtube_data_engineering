@@ -154,6 +154,21 @@ Resources:
         - Key: Name
           Value: MyRedshiftServerlessVPC
 
+  # Create an Internet Gateway to connect with various visualization tools
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: 'RedshiftInternetGateway'
+
+  # Attach Internet Gateway to the VPC
+  AttachGateway:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref MyVpc
+      InternetGatewayId: !Ref InternetGateway
+
   MySubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -203,6 +218,15 @@ Resources:
         - Key: Name
           Value: MyRouteTable
 
+  # Create a route for the internet traffic
+  PublicRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref MyRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref InternetGateway
+
   MySubnetRouteTableAssociation1:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
@@ -220,6 +244,8 @@ Resources:
     Properties:
       SubnetId: !Ref MySubnet3
       RouteTableId: !Ref MyRouteTable
+
+  
 
   MyS3VpcEndpoint:
     Type: 'AWS::EC2::VPCEndpoint'
