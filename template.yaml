@@ -136,6 +136,7 @@ Resources:
       WorkgroupName: youtube-wg
       BaseCapacity: 8
       EnhancedVpcRouting: true
+      PubliclyAccessible: true
       NamespaceName: !Ref MyRedshiftServerlessNamespace
       SubnetIds:
         - !Ref MySubnet1
