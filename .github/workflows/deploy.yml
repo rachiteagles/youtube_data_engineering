@@ -37,7 +37,19 @@ jobs:
         HASH=$(echo -n "$COMBINED_KEYS" | sha256sum | awk '{print $1}')
         PACKAGE_NAME="package-$HASH"
 
-        aws s3api create-bucket --bucket sam-management --region ${{ secrets.DEFAULT_AWS_REGION }}
+        BUCKET_NAME="sam management"
+
+        if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "Bucket '$BUCKET_NAME' exists. Deleting..."
+
+            aws s3 rb "s3://$BUCKET_NAME" --force
+
+            echo "Bucket '$BUCKET_NAME' deleted."
+        else
+            echo "Bucket '$BUCKET_NAME' does not exist."
+        fi
+
+        aws s3api create-bucket --bucket $BUCKET_NAME --region ${{ secrets.DEFAULT_AWS_REGION }}
 
 
     - name: Deploy SAM Application
