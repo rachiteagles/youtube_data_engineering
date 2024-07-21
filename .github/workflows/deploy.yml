@@ -32,9 +32,15 @@ jobs:
 
     - name: Creating S3 management bucket for AWS SAM
       run : |
+        
+        COMBINED_KEYS="${{ secrets.AWS_ACCESS_KEY_ID }}${{ secrets.AWS_SECRET_ACCESS_KEY }}" 
+        HASH=$(echo -n "$COMBINED_KEYS" | sha256sum | awk '{print $1}')
+        PACKAGE_NAME="package-$HASH"
+
         aws s3api create-bucket --bucket sam-management --region ${{ secrets.DEFAULT_AWS_REGION }}
+
 
     - name: Deploy SAM Application
       run: |
         sam build
-        sam deploy --stack-name youtube --s3-bucket sam-management --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
+        sam deploy --stack-name youtube --s3-bucket sam-management --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=PackageName,ParameterValue=$PACKAGE_NAME ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
