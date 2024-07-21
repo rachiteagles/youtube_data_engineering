@@ -70,7 +70,7 @@ Resources:
         Variables:
           S3_SCRIPT_BUCKET: script-youtube
           S3_KEY: scraper.zip
-          REGION: us-east-1
+          REGION: !Ref DefaultRegion
           INSTANCE_TYPE: t2.micro
           AMI_ID: ami-04b70fa74e45c3917 # Update with a valid AMI ID for your region
           IAM_INSTANCE_PROFILE_NAME: !Ref EC2InstanceProfile
@@ -175,7 +175,7 @@ Resources:
     Properties:
       VpcId: !Ref MyVpc
       CidrBlock: '10.0.1.0/24'
-      AvailabilityZone: 'us-east-1e'
+      AvailabilityZone: !Sub '${DefaultRegion}e'
       Tags:
         - Key: Name
           Value: MyRedshiftSubnet1
@@ -185,7 +185,7 @@ Resources:
     Properties:
       VpcId: !Ref MyVpc
       CidrBlock: '10.0.2.0/24'
-      AvailabilityZone: 'us-east-1b'
+      AvailabilityZone: !Sub '${DefaultRegion}b'
       Tags:
         - Key: Name
           Value: MyRedshiftSubnet2
@@ -195,7 +195,7 @@ Resources:
     Properties:
       VpcId: !Ref MyVpc
       CidrBlock: '10.0.3.0/24'
-      AvailabilityZone: 'us-east-1c'
+      AvailabilityZone: !Sub '${DefaultRegion}c'
       Tags:
         - Key: Name
           Value: MyRedshiftSubnet3
@@ -251,7 +251,7 @@ Resources:
   MyS3VpcEndpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
-      ServiceName: 'com.amazonaws.us-east-1.s3'
+      ServiceName: !Sub 'com.amazonaws.{DefaultRegion}.s3'
       VpcId: !Ref MyVpc
       VpcEndpointType: Gateway
       RouteTableIds:
@@ -265,11 +265,11 @@ Resources:
         Name: RedshiftConnection
         ConnectionType: JDBC
         ConnectionProperties:
-          JDBC_CONNECTION_URL: !Sub jdbc:redshift://youtube-wg.${AWS::AccountId}.us-east-1.redshift-serverless.amazonaws.com:5439/youtube
+          JDBC_CONNECTION_URL: !Sub jdbc:redshift://youtube-wg.${AWS::AccountId}.{DefaultRegion}.redshift-serverless.amazonaws.com:5439/youtube
           USERNAME: admin
           PASSWORD: Admin1405
         PhysicalConnectionRequirements:
-          AvailabilityZone: us-east-1e
+          AvailabilityZone: !Sub '${DefaultRegion}e'
           SubnetId: !Ref MySubnet1
           SecurityGroupIdList:
             - !Ref MySecurityGroup
