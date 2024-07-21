@@ -62,10 +62,6 @@ Deployment is automated using GitHub Actions. The deployment workflow is trigger
 3. **Monitoring and Logs**: Logs from the EC2 instance and Glue job outcomes are stored in their respective S3 buckets for monitoring and debugging.
 4. **Connecting to Visualization Tools**: Use the URL endpoint of the Redshift workgroup to connect it to a visualization tool for further analysis and visualization of the data.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
