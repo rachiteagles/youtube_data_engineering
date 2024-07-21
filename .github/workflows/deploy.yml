@@ -37,7 +37,7 @@ jobs:
         HASH=$(echo -n "$COMBINED_KEYS" | sha256sum | awk '{print $1}')
         PACKAGE_NAME="package-$HASH"
 
-        BUCKET_NAME="sam management"
+        BUCKET_NAME="sam-management"
 
         if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
             echo "Bucket '$BUCKET_NAME' exists. Deleting..."
