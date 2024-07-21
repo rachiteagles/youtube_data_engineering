@@ -44,3 +44,4 @@ jobs:
       run: |
         sam build
         sam deploy --stack-name youtube --s3-bucket sam-management --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=PackageName,ParameterValue=$PACKAGE_NAME ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
+
