@@ -50,13 +50,14 @@ def MyTransform(glueContext, dfc) -> DynamicFrameCollection:
     dyf = DynamicFrame.fromDF(df,glueContext,'mod_df')
     dyfc = DynamicFrameCollection({'dyf':dyf},glueContext)
     return dyfc
-args = getResolvedOptions(sys.argv, ['JOB_NAME','BUCKET_NAME', 'OBJECT_KEY'])
+args = getResolvedOptions(sys.argv, ['JOB_NAME','BUCKET_NAME', 'OBJECT_KEY', 'REDSHIFT_TEMP_BUCKET'])
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
+redshift_temp_bucket = args['REDSHIFT_TEMP_BUCKET']
 bucket_name = args['BUCKET_NAME']
 object_key = args['OBJECT_KEY']
 
@@ -119,7 +120,7 @@ AmazonRedshift_node1720146258039 = glueContext.write_dynamic_frame.from_options(
             DROP TABLE public.youtube_temp_vl1j0e;
             END;
         """,
-        "redshiftTmpDir": "s3://redshift-youtube-tmp/",
+        "redshiftTmpDir": f"s3://{redshift_temp_bucket}/",
         "useConnectionProperties": "true",
         "dbtable": "public.youtube_temp_vl1j0e",
         "connectionName": "RedshiftConnection",

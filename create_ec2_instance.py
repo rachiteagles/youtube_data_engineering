@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 def lambda_handler(event, context):
     ec2 = boto3.resource('ec2', region_name=os.environ['REGION'])
     s3_script_bucket = os.environ['S3_SCRIPT_BUCKET']
+    ec2_logs = os.environ['EC2_LOGS']
     s3_key = os.environ['S3_KEY']
     instance_type = os.environ['INSTANCE_TYPE']
     ami_id = os.environ['AMI_ID']
@@ -89,7 +90,7 @@ def lambda_handler(event, context):
     echo "running python script" >> $LOG_FILE
     sudo python3 scraper/app.py >> "$LOG_FILE" 2>&1
     
-    sudo aws s3 cp $LOG_FILE s3://ec2-logs-youtube/log_$timestamp.txt >> "$LOG_FILE" 2>&1
+    sudo aws s3 cp $LOG_FILE s3://{ec2_logs}/log_$timestamp.txt >> "$LOG_FILE" 2>&1
 
     echo "Fetch metadata token" >> $LOG_FILE
     TOKEN=$(curl -sS http://169.254.169.254/latest/api/token -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 21600") >> "$LOG_FILE" 2>&1

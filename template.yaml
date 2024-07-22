@@ -3,6 +3,8 @@ Transform: 'AWS::Serverless-2016-10-31'
 
 Parameters:
 
+  UniqueString: 
+    Type: String
   AccessKeyId: 
     Type: String
   SecretAccessKey:
@@ -22,37 +24,37 @@ Resources:
   RedshiftTempBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'redshift-youtube-tmp'
+      BucketName: !Sub 'redshift-youtube-tmp-${UniqueString}'
 
   # S3 Bucket for ec2 logs
   EC2LogsBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'ec2-logs-youtube'
+      BucketName: !Sub 'ec2-logs-youtube-${UniqueString}'
 
   # S3 Bucket for script files
   ScriptJsonBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'script-youtube'
+      BucketName: !Sub 'script-youtube-${UniqueString}'
 
   # S3 Bucket for incoming JSON files
   IncomingJsonBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'youtube-json'
+      BucketName: !Sub 'youtube-json-${UniqueString}'
   
   # S3 Bucket for Successful JSON files
   SuccessfulJsonBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'successful-json'
+      BucketName: !Sub 'successful-json-${UniqueString}'
 
   # S3 Bucket for Failed JSON files
   FailureJsonBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: 'failed-json'
+      BucketName: !Sub 'failed-json-${UniqueString}'
 
   # scraping
   CreateEC2InstanceFunction:
@@ -68,7 +70,8 @@ Resources:
         - AmazonS3ReadOnlyAccess
       Environment:
         Variables:
-          S3_SCRIPT_BUCKET: script-youtube
+          EC2_LOGS: !Ref EC2LogsBucket
+          S3_SCRIPT_BUCKET: !Ref ScriptJsonBucket
           S3_KEY: scraper.zip
           REGION: !Ref DefaultRegion
           INSTANCE_TYPE: t2.micro
@@ -266,8 +269,8 @@ Resources:
         ConnectionType: JDBC
         ConnectionProperties:
           JDBC_CONNECTION_URL: !Sub jdbc:redshift://youtube-wg.${AWS::AccountId}.{DefaultRegion}.redshift-serverless.amazonaws.com:5439/youtube
-          USERNAME: admin
-          PASSWORD: Admin1405
+          USERNAME: !Ref AdminUsername
+          PASSWORD: !Ref AdminUserPassword
         PhysicalConnectionRequirements:
           AvailabilityZone: !Sub '${DefaultRegion}e'
           SubnetId: !Ref MySubnet1
@@ -393,6 +396,7 @@ Resources:
       CodeUri: .
       Role: !GetAtt LambdaExecutionRole.Arn
       Environment:
+        REDSHIFT_TEMP_BUCKET: !Ref RedshiftTempBucket
         Variables:
           GLUE_JOB_NAME: !Ref GlueJob
       Events:

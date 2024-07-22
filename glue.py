@@ -6,7 +6,7 @@ s3_client = boto3.client('s3')
 def handler(event, context):
     glue = boto3.client('glue')
     job_name = os.environ['GLUE_JOB_NAME']
-    processed_bucket_name = 'processed-json-youtube'
+    redshift_temp_bucket = os.environ['REDSHIFT_TEMP_BUCKET']
 
     # Extract the bucket name and object key from the event
     for record in event['Records']:
@@ -19,6 +19,7 @@ def handler(event, context):
             Arguments={
                 '--BUCKET_NAME': bucket,
                 '--OBJECT_KEY': key,
+                '--REDSHIFT_TEMP_BUCKET': redshift_temp_bucket,
                 '--enable-continuous-cloudwatch-log': 'true'
             }
         )
