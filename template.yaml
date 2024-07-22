@@ -396,8 +396,8 @@ Resources:
       CodeUri: .
       Role: !GetAtt LambdaExecutionRole.Arn
       Environment:
-        REDSHIFT_TEMP_BUCKET: !Ref RedshiftTempBucket
         Variables:
+          REDSHIFT_TEMP_BUCKET: !Ref RedshiftTempBucket
           GLUE_JOB_NAME: !Ref GlueJob
       Events:
         S3Event:
