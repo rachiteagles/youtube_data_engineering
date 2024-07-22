@@ -56,6 +56,14 @@ Resources:
     Properties:
       BucketName: !Sub 'failed-json-${UniqueString}'
 
+  #creating key pair
+
+  MyKeyPair:
+    Type: AWS::EC2::KeyPair
+    Properties:
+      KeyName: youtube
+      KeyType: rsa
+
   # scraping
   CreateEC2InstanceFunction:
     Type: AWS::Serverless::Function
@@ -77,7 +85,7 @@ Resources:
           INSTANCE_TYPE: t2.micro
           AMI_ID: ami-04b70fa74e45c3917 # Update with a valid AMI ID for your region
           IAM_INSTANCE_PROFILE_NAME: !Ref EC2InstanceProfile
-          KEY_NAME: youtube
+          KEY_NAME: !Ref MyKeyPair
           ACCESS_KEY_ID: !Ref AccessKeyId
           SECRET_ACCESS_KEY: !Ref SecretAccessKey
           GOOGLE_API_KEY: !Ref GoogleApiKey
