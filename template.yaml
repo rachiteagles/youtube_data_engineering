@@ -254,7 +254,7 @@ Resources:
   MyS3VpcEndpoint:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
-      ServiceName: !Sub 'com.amazonaws.{DefaultRegion}.s3'
+      ServiceName: !Sub 'com.amazonaws.${DefaultRegion}.s3'
       VpcId: !Ref MyVpc
       VpcEndpointType: Gateway
       RouteTableIds:
@@ -268,7 +268,7 @@ Resources:
         Name: RedshiftConnection
         ConnectionType: JDBC
         ConnectionProperties:
-          JDBC_CONNECTION_URL: !Sub jdbc:redshift://youtube-wg.${AWS::AccountId}.{DefaultRegion}.redshift-serverless.amazonaws.com:5439/youtube
+          JDBC_CONNECTION_URL: !Sub jdbc:redshift://youtube-wg.${AWS::AccountId}.${DefaultRegion}.redshift-serverless.amazonaws.com:5439/youtube
           USERNAME: !Ref AdminUsername
           PASSWORD: !Ref AdminUserPassword
         PhysicalConnectionRequirements:
