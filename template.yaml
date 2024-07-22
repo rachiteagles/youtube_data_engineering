@@ -80,6 +80,7 @@ Resources:
         Variables:
           EC2_LOGS: !Ref EC2LogsBucket
           S3_SCRIPT_BUCKET: !Ref ScriptJsonBucket
+          LOAD_BUCKET_NAME: !Ref IncomingJsonBucket
           S3_KEY: scraper.zip
           REGION: !Ref DefaultRegion
           INSTANCE_TYPE: t2.micro

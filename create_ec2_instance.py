@@ -14,6 +14,7 @@ def lambda_handler(event, context):
     SECRET_ACCESS_KEY = os.environ['SECRET_ACCESS_KEY']
     DEFAULT_REGION = os.environ['DEFAULT_REGION']
     GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
+    LOAD_BUCKET_NAME = os.environ['LOAD_BUCKET_NAME']
 
     # Folder to zip and the destination bucket
     folder_to_zip = 'scraper'  # Change to your folder path
@@ -86,6 +87,7 @@ def lambda_handler(event, context):
     echo aws_secret_access_key={SECRET_ACCESS_KEY} >> /etc/environment
     echo region={DEFAULT_REGION} >> /etc/environment
     echo GOOGLE_API_KEY={GOOGLE_API_KEY} >> /etc/environment
+    echo load_bucket_name={LOAD_BUCKET_NAME} >> /etc/environment
 
     echo "running python script" >> $LOG_FILE
     sudo python3 scraper/app.py >> "$LOG_FILE" 2>&1

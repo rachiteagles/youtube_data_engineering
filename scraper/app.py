@@ -5,6 +5,7 @@ from scrape import *
 aws_access_key_id = os.environ['aws_access_key_id']
 aws_secret_access_key = os.environ['aws_secret_access_key']
 region=os.environ['region']
+bucket_name = os.environ['load_bucket_name']
 
 # Set up YouTube API client
 api_service_name = "youtube"
@@ -47,7 +48,7 @@ finally:
     with open(filename, 'w') as f:
         json.dump(final_data, f, indent=4)
 
-    bucket_name = 'youtube-json'
+    
     file_name = f'{current_date}.json'
 
     create_bucket_if_not_exists(bucket_name, s3, region='us-east-1')

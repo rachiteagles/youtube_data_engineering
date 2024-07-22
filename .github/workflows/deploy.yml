@@ -30,23 +30,9 @@ jobs:
         aws configure set region ${{ secrets.DEFAULT_AWS_REGION }}
         aws configure set output json
 
-    - name: Creating S3 management bucket for AWS SAM and Deploy SAM Application
+    - name: Deploy SAM Application
       run : |
-
-        BUCKET_NAME=sam-management-${{ vars.UNIQUE_STRING }}
-
-        if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
-            echo "Bucket '$BUCKET_NAME' exists. Deleting..."
-
-            aws s3 rb "s3://$BUCKET_NAME" --force
-
-            echo "Bucket '$BUCKET_NAME' deleted."
-        else
-            echo "Bucket '$BUCKET_NAME' does not exist."
-        fi
-
-        aws s3api create-bucket --bucket $BUCKET_NAME --region ${{ secrets.DEFAULT_AWS_REGION }}
-
+      
         sam build
         sam deploy --stack-name youtube --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=UniqueString,ParameterValue=${{ vars.UNIQUE_STRING }} ParameterKey=PackageName,ParameterValue=$PACKAGE_NAME ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
 
