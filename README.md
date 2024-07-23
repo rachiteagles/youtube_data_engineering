@@ -56,7 +56,7 @@ Deployment is automated using GitHub Actions. The deployment workflow is trigger
 
 ## Usage
 
-1. **Scraping YouTube Data**: The scraper runs daily at 8 AM UTC, scraping data from YouTube and storing it in the `youtube-json` bucket.
+1. **Scraping YouTube Data**: The scraper runs daily at 8 AM UTC, scraping data from YouTube and storing it in the `youtube-json` bucket. Scraper can run my manually triggering CreateEC2 lambda function.
 2. **Processing Data with AWS Glue**: The Glue job processes the scraped data and loads it into Redshift Serverless.
 3. **Monitoring and Logs**: Logs from the EC2 instance and Glue job outcomes are stored in their respective S3 buckets for monitoring and debugging.
 4. **Connecting to Visualization Tools**: Use the URL endpoint of the Redshift workgroup to connect it to a visualization tool for further analysis and visualization of the data.
