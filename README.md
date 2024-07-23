@@ -67,7 +67,7 @@ P.S. - all these resources are created in us-east-1 region. if you cant see reso
 
 ![Youtube Analytics](youtube_analytics.png)
 
-After running the pipeline for a week, collecting data and visualizing data on Tableau, I found that video count is highest for youtube however, video views count is highest for India
+After running the pipeline for a week, collecting data and visualizing data on Tableau, I found that video count is highest for US however, video views count is highest for India
 
 ## Steps to delete the stack
 
