@@ -134,44 +134,6 @@ Resources:
 
   # moving data from json to bucket
 
-  RedshiftQueryEditorRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: redshift-serverless.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonRedshiftQueryEditorV2FullAccess
-        - arn:aws:iam::aws:policy/AmazonRedshiftFullAccess
-      Policies:
-        - PolicyName: CustomRedshiftQueryEditorPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - redshift-data:ExecuteStatement
-                  - redshift-data:GetStatementResult
-                  - redshift-data:ListDatabases
-                  - redshift-data:ListSchemas
-                  - redshift-data:ListTables
-                  - redshift-serverless:GetCredentials
-                  - redshift-serverless:ListWorkgroups
-                  - redshift-serverless:ListNamespaces
-                Resource: "*"
-
-  QueryEditorRedshiftWorkgroup:
-    Type: 'AWS::RedshiftServerless::Workgroup'
-    Properties:
-      WorkgroupName: !Ref MyRedshiftServerlessWorkgroup
-      NamespaceName: !Ref MyRedshiftServerlessNamespace
-      EnhancedVpcRouting: true
-      BaseCapacity: 2
-
   MyRedshiftServerlessNamespace:
     Type: 'AWS::RedshiftServerless::Namespace'
     Properties: 
