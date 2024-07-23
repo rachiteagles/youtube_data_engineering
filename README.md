@@ -44,15 +44,15 @@ Deployment is automated using GitHub Actions. The deployment workflow is trigger
 
 ### Prerequisites
 
-- AWS Account
-- AWS SAM CLI
-- AWS CLI
-- GitHub Secrets configured with:
+
+- Configure your GitHub Secrets with following keys:
   - `AWS_ACCESS_KEY_ID`
   - `AWS_SECRET_ACCESS_KEY`
   - `GOOGLE_API_KEY`
   - `ADMINUSERNAME`
   - `ADMINUSERPASSWORD`
+
+- Also, create a github variable by the name `UNIQUE_STRING` and add any value to it. This will ensure that the AWS S3 buckets name are unique globally (essential while creating an AWS S3 bucket)
 
 ## Usage
 
