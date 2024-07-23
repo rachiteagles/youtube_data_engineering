@@ -164,6 +164,14 @@ Resources:
                   - redshift-serverless:ListNamespaces
                 Resource: "*"
 
+  QueryEditorRedshiftWorkgroup:
+    Type: 'AWS::RedshiftServerless::Workgroup'
+    Properties:
+      WorkgroupName: !Ref MyRedshiftServerlessWorkgroup
+      NamespaceName: !Ref MyRedshiftServerlessNamespace
+      EnhancedVpcRouting: true
+      BaseCapacity: 2
+
   MyRedshiftServerlessNamespace:
     Type: 'AWS::RedshiftServerless::Namespace'
     Properties: 
