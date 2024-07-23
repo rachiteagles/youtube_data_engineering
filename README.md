@@ -67,9 +67,9 @@ P.S. - all these resources are created in us-east-1 region. if you cant see reso
 
 1. **Delete all the buckets created by the stack**
 2. **Run below mentioned line in your terminal to delete the stack**-
-    aws cloudformation delete-stack --stack-name youtube  
+    ```aws cloudformation delete-stack --stack-name youtube```
 3. **Run below mentioned line in your terminal to delete the stack created by AWS SAM management**-
-    aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default
+    ```aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default```
 
 ## Contributing
 
