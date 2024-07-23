@@ -50,7 +50,6 @@ Deployment is automated using GitHub Actions. The deployment workflow is trigger
 - GitHub Secrets configured with:
   - `AWS_ACCESS_KEY_ID`
   - `AWS_SECRET_ACCESS_KEY`
-  - `DEFAULT_AWS_REGION`
   - `GOOGLE_API_KEY`
   - `ADMINUSERNAME`
   - `ADMINUSERPASSWORD`
@@ -61,6 +60,16 @@ Deployment is automated using GitHub Actions. The deployment workflow is trigger
 2. **Processing Data with AWS Glue**: The Glue job processes the scraped data and loads it into Redshift Serverless.
 3. **Monitoring and Logs**: Logs from the EC2 instance and Glue job outcomes are stored in their respective S3 buckets for monitoring and debugging.
 4. **Connecting to Visualization Tools**: Use the URL endpoint of the Redshift workgroup to connect it to a visualization tool for further analysis and visualization of the data.
+
+P.S. - all these resources are created in us-east-1 region. if you cant see resources getting created in the console then please check the region of your account on top right side section of title bar  
+
+## Steps to delete the stack
+
+1. **Delete all the buckets created by the stack**
+2. **Run below mentioned line in your terminal to delete the stack**-
+    aws cloudformation delete-stack --stack-name youtube  
+3. **Run below mentioned line in your terminal to delete the stack created by AWS SAM management**-
+    aws cloudformation delete-stack --stack-name aws-sam-cli-managed-default
 
 ## Contributing
 
