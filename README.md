@@ -63,6 +63,12 @@ Deployment is automated using GitHub Actions. The deployment workflow is trigger
 
 P.S. - all these resources are created in us-east-1 region. if you cant see resources getting created in the console then please check the region of your account on top right side section of title bar  
 
+## Insights
+
+![Youtube Analytics](youtube_analytics.png)
+
+After running the pipeline for a week, collecting data and visualizing data on Tableau, I found that video count is highest for youtube however, video views count is highest for India
+
 ## Steps to delete the stack
 
 1. **Delete all the buckets created by the stack**
