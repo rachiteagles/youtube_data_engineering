@@ -385,9 +385,7 @@ Resources:
                   - 's3:PutObject'
                   - 's3:GetObject'
                   - 's3:ListBucket'
-                Resource: 
-                  - 'arn:aws:s3:::script-youtube/*'
-                  - 'arn:aws:s3:::youtube-json/*'
+                Resource: 'arn:aws:s3:::*'
               - Effect: 'Allow'
                 Action:
                   - 'logs:CreateLogGroup'
@@ -441,12 +439,7 @@ Resources:
                   - "s3:PutObject"
                   - "s3:DeleteObject"
                   - "s3:ListBucket"
-                Resource: 
-                  - 'arn:aws:s3:::script-youtube/*'
-                  - 'arn:aws:s3:::youtube-json/*'
-                  - 'arn:aws:s3:::successful-json/*'
-                  - 'arn:aws:s3:::failed-json/*'
-                  - 'arn:aws:s3:::youtube-json'
+                Resource: 'arn:aws:s3:::*'
               - Effect: 'Allow'
                 Action:
                   - 'logs:CreateLogGroup'
