@@ -34,5 +34,5 @@ jobs:
       run : |
 
         sam build
-        sam deploy --stack-name youtube --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=UniqueString,ParameterValue=${{ vars.UNIQUE_STRING }} ParameterKey=PackageName,ParameterValue=$PACKAGE_NAME ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=us-east-1,ParameterValue=${{ secrets.DEFAULT_AWS_REGION }} ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
+        sam deploy --stack-name youtube --resolve-s3 --capabilities CAPABILITY_IAM --parameter-overrides ParameterKey=UniqueString,ParameterValue=${{ vars.UNIQUE_STRING }} ParameterKey=PackageName,ParameterValue=$PACKAGE_NAME ParameterKey=AccessKeyId,ParameterValue=${{ secrets.AWS_ACCESS_KEY_ID }} ParameterKey=SecretAccessKey,ParameterValue=${{ secrets.AWS_SECRET_ACCESS_KEY }} ParameterKey=GoogleApiKey,ParameterValue=${{ secrets.GOOGLE_API_KEY }} ParameterKey=DefaultRegion,ParameterValue=us-east-1 ParameterKey=AdminUsername,ParameterValue=${{ secrets.ADMINUSERNAME }} ParameterKey=AdminUserPassword,ParameterValue=${{ secrets.ADMINUSERPASSWORD }} 
 
